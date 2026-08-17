@@ -8,10 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 enum class Screen { FORECAST, SEARCH }
 
@@ -32,7 +28,14 @@ data class UiState(
     val expandedDay: String? = null,
 )
 
-class WeatherViewModel(private val store: Store) : ViewModel() {
+class WeatherViewModel(
+    private val store: Store,
+    /**
+     * Called after a refresh has saved a fresh forecast, so another surface — the home-screen
+     * widget — can re-render. A lambda rather than a `Context` keeps this class framework-free.
+     */
+    private val onForecastSaved: () -> Unit = {},
+) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -66,26 +69,9 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
         return if (usable) "$message ($detail)" else message
     }
 
-    /**
-     * Real now in the city's own timezone, truncated to the hour and shaped like the API's
-     * timestamps, so a replayed cache slices its 24-hour strip from now instead of the fetch
-     * time. An unusable timezone degrades to `""`, which makes `toForecast` fall back to
-     * `current.time` — this runs on the offline path and must never throw.
-     */
-    private fun nowIn(timezone: String): String =
-        runCatching {
-            ZonedDateTime.now(ZoneId.of(timezone))
-                .truncatedTo(ChronoUnit.HOURS)
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
-        }.getOrElse { "" }
-
     /** Renders whatever was last fetched, so a slow or dead network never shows a blank screen. */
     private fun showCache() {
-        val body = store.cachedBody() ?: return
-        val forecast = runCatching {
-            val response = WeatherApi.parseForecast(body)
-            response.toForecast(nowIn(response.timezone))
-        }.getOrNull() ?: return
+        val forecast = cachedForecast(store) ?: return
         _state.update { it.copy(forecast = forecast, fetchedAt = store.cachedAt(), offline = true) }
     }
 
@@ -95,13 +81,8 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
         refreshJob?.cancel()
         _state.update { it.copy(loading = true, error = null) }
         refreshJob = viewModelScope.launch {
-            WeatherApi.fetch(WeatherApi.forecastUrl(city.latitude, city.longitude))
-                .mapCatching { body ->
-                    val response = WeatherApi.parseForecast(body)
-                    response.toForecast(nowIn(response.timezone)) to body
-                }
-                .onSuccess { (forecast, body) ->
-                    store.saveCache(body)
+            loadForecast(store, city)
+                .onSuccess { forecast ->
                     _state.update {
                         it.copy(
                             forecast = forecast,
@@ -111,6 +92,7 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
                             error = null,
                         )
                     }
+                    onForecastSaved()
                 }
                 .onFailure { failure ->
                     // Keep any cached forecast on screen; the banner explains why it is stale.
