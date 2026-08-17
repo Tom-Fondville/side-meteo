@@ -38,6 +38,10 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
         }
     }
 
+    /** French sentence first, technical detail appended in parentheses when there is one. */
+    private fun frenchError(message: String, failure: Throwable): String =
+        message + (failure.message?.let { " ($it)" } ?: "")
+
     /** Renders whatever was last fetched, so a slow or dead network never shows a blank screen. */
     private fun showCache() {
         val body = store.cachedBody() ?: return
@@ -69,7 +73,7 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
                         it.copy(
                             loading = false,
                             offline = it.forecast != null,
-                            error = failure.message ?: "Échec de la mise à jour",
+                            error = frenchError("Échec de la mise à jour", failure),
                         )
                     }
                 }
@@ -91,7 +95,7 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
                             loading = false,
                             searched = true,
                             results = emptyList(),
-                            error = failure.message ?: "Recherche impossible",
+                            error = frenchError("Recherche impossible", failure),
                         )
                     }
                 }
@@ -100,6 +104,7 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
 
     fun selectCity(city: City) {
         store.city = city
+        store.clearCache()
         _state.update {
             it.copy(
                 city = city,

@@ -34,6 +34,13 @@ class Store(context: Context) {
 
     fun cachedAt(): Long? = prefs.getLong(KEY_AT, 0L).takeIf { it > 0L }
 
+    fun clearCache() {
+        prefs.edit()
+            .remove(KEY_BODY)
+            .remove(KEY_AT)
+            .apply()
+    }
+
     private companion object {
         const val KEY_CITY = "city"
         const val KEY_BODY = "cache_body"
