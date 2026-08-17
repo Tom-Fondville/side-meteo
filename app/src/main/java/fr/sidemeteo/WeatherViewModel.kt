@@ -25,6 +25,11 @@ data class UiState(
     val screen: Screen = Screen.FORECAST,
     val results: List<City> = emptyList(),
     val searched: Boolean = false,
+    /**
+     * Date of the expanded day in the 7-day list, or null when all rows are collapsed. Keyed by
+     * date rather than list index so a refresh mid-expand cannot shift which row is open.
+     */
+    val expandedDay: String? = null,
 )
 
 class WeatherViewModel(private val store: Store) : ViewModel() {
@@ -160,10 +165,16 @@ class WeatherViewModel(private val store: Store) : ViewModel() {
                 searched = false,
                 forecast = if (changed) null else it.forecast,
                 fetchedAt = if (changed) null else it.fetchedAt,
+                expandedDay = null,
                 error = null,
             )
         }
         refresh()
+    }
+
+    /** Opens the tapped day's hourly detail, or collapses it if it was already open. */
+    fun toggleDay(date: String) = _state.update {
+        it.copy(expandedDay = if (it.expandedDay == date) null else date)
     }
 
     /**

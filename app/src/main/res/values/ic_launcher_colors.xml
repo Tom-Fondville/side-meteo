@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sky blue behind the sun-and-cloud foreground. -->
+    <color name="ic_launcher_background">#1B4F72</color>
+</resources>

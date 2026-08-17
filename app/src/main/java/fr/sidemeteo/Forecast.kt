@@ -22,6 +22,8 @@ data class DayEntry(
     val uvIndexMax: Double?,
     val sunrise: String,
     val sunset: String,
+    /** That day's own 24 hours, for the expanded day detail. Empty if the response has none. */
+    val hours: List<HourEntry> = emptyList(),
 )
 
 data class Forecast(
@@ -32,7 +34,8 @@ data class Forecast(
 )
 
 /**
- * Flattens Open-Meteo's parallel arrays into records, keeping the 24 hours from now on.
+ * Flattens Open-Meteo's parallel arrays into records: [Forecast.hours] is the 24 hours from now
+ * on, and every [DayEntry] additionally carries its own day's hours for the expanded day detail.
  *
  * ISO-8601 timestamps in a fixed format and a single timezone compare correctly as
  * strings, so no date parsing is needed to find the starting index.
@@ -46,20 +49,23 @@ data class Forecast(
  * silently falling back to the oldest 24.
  */
 fun ForecastResponse.toForecast(now: String = current.time): Forecast {
-    val from = maxOf(now, current.time)
-    val start = hourly.time.indexOfFirst { it >= from }
+    val allHours = hourly.time.indices.map { i ->
+        HourEntry(
+            time = hourly.time[i],
+            temperature = hourly.temperature.getOrNull(i),
+            precipitationProbability = hourly.precipitationProbability.getOrNull(i),
+            precipitation = hourly.precipitation.getOrNull(i),
+            weatherCode = hourly.weatherCode.getOrNull(i),
+        )
+    }
 
+    // An hourly timestamp is "<date>T<hh>:<mm>", so its first ten characters are its day.
+    val hoursByDate = allHours.groupBy { it.time.take(10) }
+
+    val from = maxOf(now, current.time)
+    val start = allHours.indexOfFirst { it.time >= from }
     val hours = if (start < 0) emptyList() else {
-        val end = (start + 24).coerceAtMost(hourly.time.size)
-        (start until end).map { i ->
-            HourEntry(
-                time = hourly.time[i],
-                temperature = hourly.temperature.getOrNull(i),
-                precipitationProbability = hourly.precipitationProbability.getOrNull(i),
-                precipitation = hourly.precipitation.getOrNull(i),
-                weatherCode = hourly.weatherCode.getOrNull(i),
-            )
-        }
+        allHours.subList(start, (start + 24).coerceAtMost(allHours.size))
     }
 
     val days = daily.time.indices.map { i ->
@@ -73,6 +79,7 @@ fun ForecastResponse.toForecast(now: String = current.time): Forecast {
             uvIndexMax = daily.uvIndexMax.getOrNull(i),
             sunrise = daily.sunrise.getOrElse(i) { "" },
             sunset = daily.sunset.getOrElse(i) { "" },
+            hours = hoursByDate[daily.time[i]].orEmpty(),
         )
     }
 

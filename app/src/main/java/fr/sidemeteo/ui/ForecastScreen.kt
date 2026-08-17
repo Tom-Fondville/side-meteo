@@ -1,5 +1,6 @@
 package fr.sidemeteo.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +35,12 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun ForecastScreen(state: UiState, onRefresh: () -> Unit, onOpenSearch: () -> Unit) {
+fun ForecastScreen(
+    state: UiState,
+    onRefresh: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onToggleDay: (String) -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -103,7 +109,11 @@ fun ForecastScreen(state: UiState, onRefresh: () -> Unit, onOpenSearch: () -> Un
         Spacer(Modifier.height(16.dp))
         Text("7 jours", style = MaterialTheme.typography.titleMedium)
         forecast.days.forEach { day ->
-            DayRow(day)
+            DayRow(
+                day = day,
+                expanded = day.date == state.expandedDay,
+                onToggle = { onToggleDay(day.date) },
+            )
             HorizontalDivider()
         }
 
@@ -157,12 +167,16 @@ private fun HourColumn(hour: HourEntry) {
 /**
  * Two lines per day: the headline on top, then the detail — rain, UV and the sun times, which
  * are fetched for all seven days but used to be shown only for day 0 inside [CurrentCard].
+ *
+ * Tapping the row expands that day's own hours, rendered through the same [HourColumn] as the
+ * "next 24 h" strip.
  */
 @Composable
-private fun DayRow(day: DayEntry) {
+private fun DayRow(day: DayEntry, expanded: Boolean, onToggle: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onToggle)
             .padding(vertical = 8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -182,6 +196,23 @@ private fun DayRow(day: DayEntry) {
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.fillMaxWidth(),
         )
+
+        if (expanded) {
+            if (day.hours.isEmpty()) {
+                Text(
+                    text = "Pas de détail horaire pour ce jour.",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            } else {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(top = 8.dp),
+                ) {
+                    items(day.hours.size) { i -> HourColumn(day.hours[i]) }
+                }
+            }
+        }
     }
 }
 

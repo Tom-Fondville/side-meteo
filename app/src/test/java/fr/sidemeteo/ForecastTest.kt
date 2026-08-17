@@ -92,6 +92,52 @@ class ForecastTest {
     }
 
     @Test
+    fun `every day carries its own 24 hours`() {
+        val forecast = response.toForecast()
+
+        assertEquals(7, forecast.days.size)
+        forecast.days.forEach { day ->
+            assertEquals("hours for ${day.date}", 24, day.hours.size)
+            assertTrue(
+                "hours for ${day.date} belong to another day",
+                day.hours.all { it.time.startsWith(day.date) },
+            )
+        }
+        // Per-day hours are the whole response, not the next-24 slice: 7 x 24 = 168.
+        assertEquals(168, forecast.days.sumOf { it.hours.size })
+        assertEquals("2026-08-18T00:00", forecast.days[1].hours.first().time)
+        assertEquals("2026-08-18T23:00", forecast.days[1].hours.last().time)
+    }
+
+    @Test
+    fun `a truncated hourly array leaves later days empty rather than throwing`() {
+        val trimmed = response.copy(
+            hourly = response.hourly.copy(
+                time = response.hourly.time.take(12),
+                temperature = response.hourly.temperature.take(12),
+                precipitationProbability = response.hourly.precipitationProbability.take(12),
+                precipitation = response.hourly.precipitation.take(12),
+                weatherCode = response.hourly.weatherCode.take(12),
+            ),
+        )
+
+        val days = trimmed.toForecast().days
+
+        assertEquals(7, days.size)
+        assertEquals(12, days[0].hours.size)
+        assertTrue(days.drop(1).all { it.hours.isEmpty() })
+    }
+
+    @Test
+    fun `per-day hours are unaffected by the reference instant`() {
+        // `now` slices the 24-hour strip only; a day's own hours always start at its midnight.
+        val forecast = response.toForecast(now = "2026-08-20T15:00")
+
+        assertEquals("2026-08-17T00:00", forecast.days.first().hours.first().time)
+        assertEquals(24, forecast.days.first().hours.size)
+    }
+
+    @Test
     fun `formats hour and day labels`() {
         assertEquals("14h", "2026-08-17T14:00".hourLabel())
         assertEquals("00h", "2026-08-17T00:00".hourLabel())

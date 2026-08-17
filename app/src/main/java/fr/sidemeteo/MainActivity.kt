@@ -50,6 +50,7 @@ private fun App(store: Store) {
             state = state,
             onRefresh = vm::refresh,
             onOpenSearch = vm::openSearch,
+            onToggleDay = vm::toggleDay,
         )
 
         Screen.SEARCH -> CitySearchScreen(
