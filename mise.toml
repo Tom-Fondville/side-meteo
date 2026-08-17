@@ -1,0 +1,7 @@
+[tools]
+android-sdk = "latest"
+gradle = "8.11.1"
+java = "17"
+
+[env]
+ANDROID_HOME = "/Users/t.fondville/.local/share/mise/installs/android-sdk/22.0"
