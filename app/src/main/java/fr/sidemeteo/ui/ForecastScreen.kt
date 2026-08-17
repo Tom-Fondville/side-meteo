@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +39,8 @@ fun ForecastScreen(state: UiState, onRefresh: () -> Unit, onOpenSearch: () -> Un
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            // targetSdk 35 means Android 15+ draws edge to edge with no opt-out.
+            .safeDrawingPadding()
             .padding(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -63,7 +66,10 @@ fun ForecastScreen(state: UiState, onRefresh: () -> Unit, onOpenSearch: () -> Un
         }
 
         state.fetchedAt?.let { at ->
-            val clock = SimpleDateFormat("HH:mm", Locale.FRENCH).format(Date(at))
+            // A day-old cache must not read like an hour-old one, so the date joins the clock
+            // as soon as the timestamp is not from today.
+            val clock = SimpleDateFormat(if (isToday(at)) "HH:mm" else "dd/MM HH:mm", Locale.FRENCH)
+                .format(Date(at))
             Text(
                 text = if (state.offline) "Données du $clock" else "Mis à jour à $clock",
                 style = MaterialTheme.typography.bodySmall,
@@ -72,9 +78,13 @@ fun ForecastScreen(state: UiState, onRefresh: () -> Unit, onOpenSearch: () -> Un
 
         val forecast = state.forecast
         if (forecast == null) {
-            Spacer(Modifier.height(24.dp))
-            Text("Pas encore de données.")
-            TextButton(onClick = onRefresh) { Text("Réessayer") }
+            // Nothing to draw, but stay quiet while the first fetch is still running: the
+            // spinner and "give up and retry" together read as a contradiction.
+            if (!state.loading) {
+                Spacer(Modifier.height(24.dp))
+                Text("Pas encore de données.")
+                TextButton(onClick = onRefresh) { Text("Réessayer") }
+            }
             return@Column
         }
 
@@ -120,6 +130,7 @@ private fun CurrentCard(state: UiState) {
             Text(look.label, style = MaterialTheme.typography.titleMedium)
             Text("Ressenti ${current.apparentTemperature.roundedC()}")
             Text("Vent ${current.windSpeed.roundedInt()} km/h · Humidité ${current.humidity} %")
+            Text("Précipitations ${current.precipitation.roundedOne()} mm")
             today?.let { day ->
                 Text("UV max ${day.uvIndexMax?.roundedOne() ?: "—"}")
                 Text("Lever ${day.sunrise.timeOnly()} · Coucher ${day.sunset.timeOnly()}")
@@ -136,29 +147,40 @@ private fun HourColumn(hour: HourEntry) {
         Text(weatherLook(hour.weatherCode).emoji)
         Text(hour.temperature?.roundedC() ?: "—")
         Text("${hour.precipitationProbability ?: 0} %", style = MaterialTheme.typography.bodySmall)
+        // Only when there is rain to report — a column of "0,0 mm" would be noise.
+        hour.precipitation?.takeIf { it > 0.0 }?.let {
+            Text("${it.roundedOne()} mm", style = MaterialTheme.typography.bodySmall)
+        }
     }
 }
 
+/**
+ * Two lines per day: the headline on top, then the detail — rain, UV and the sun times, which
+ * are fetched for all seven days but used to be shown only for day 0 inside [CurrentCard].
+ */
 @Composable
 private fun DayRow(day: DayEntry) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
     ) {
-        Text(day.date.dayLabel(), modifier = Modifier.weight(1f))
-        Text(weatherLook(day.weatherCode).emoji)
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(day.date.dayLabel(), modifier = Modifier.weight(1f))
+            Text(weatherLook(day.weatherCode).emoji)
+            Text(
+                text = "${day.tempMin?.roundedInt() ?: "—"} / ${day.tempMax?.roundedInt() ?: "—"}°",
+                modifier = Modifier.weight(0.6f),
+                textAlign = TextAlign.End,
+            )
+        }
         Text(
-            text = "  ${day.tempMin?.roundedInt() ?: "—"} / ${day.tempMax?.roundedInt() ?: "—"}°",
-            modifier = Modifier.weight(0.6f),
-            textAlign = TextAlign.End,
-        )
-        Text(
-            text = "  ${day.precipitationSum?.roundedOne() ?: "—"} mm · ${day.precipitationProbabilityMax ?: 0} %",
+            text = "${day.precipitationSum?.roundedOne() ?: "—"} mm" +
+                " · ${day.precipitationProbabilityMax ?: 0} %" +
+                " · UV ${day.uvIndexMax?.roundedOne() ?: "—"}" +
+                " · ☀ ${day.sunrise.timeOnly()} – ${day.sunset.timeOnly()}",
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.End,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -169,3 +191,8 @@ private fun Double.roundedOne(): String = String.format(Locale.FRENCH, "%.1f", t
 
 /** `"2026-08-17T06:46"` -> `"06:46"`. */
 private fun String.timeOnly(): String = if (length >= 16) substring(11, 16) else this
+
+private fun isToday(epochMillis: Long): Boolean {
+    val day = SimpleDateFormat("yyyy-MM-dd", Locale.FRENCH)
+    return day.format(Date(epochMillis)) == day.format(Date())
+}

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +39,8 @@ fun CitySearchScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // targetSdk 35 means Android 15+ draws edge to edge with no opt-out.
+            .safeDrawingPadding()
             .padding(16.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {

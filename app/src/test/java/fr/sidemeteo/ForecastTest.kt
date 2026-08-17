@@ -61,6 +61,22 @@ class ForecastTest {
     }
 
     @Test
+    fun `a cached body slices from the given now, not from the stale fetch time`() {
+        // The fixture was fetched at 10:00; replay it as if it were now 22:00 the same day.
+        val forecast = response.toForecast(now = "2026-08-17T22:00")
+
+        assertEquals(24, forecast.hours.size)
+        assertEquals("2026-08-17T22:00", forecast.hours.first().time)
+        assertEquals("2026-08-18T21:00", forecast.hours.last().time)
+    }
+
+    @Test
+    fun `a now past the whole window yields no hours`() {
+        // Hourly data ends at 2026-08-23T23:00, so a week-old cache has nothing left to show.
+        assertTrue(response.toForecast(now = "2026-08-24T00:00").hours.isEmpty())
+    }
+
+    @Test
     fun `takes what is available when fewer than 24 hours remain`() {
         val trimmed = response.copy(
             hourly = response.hourly.copy(

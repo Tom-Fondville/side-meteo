@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-// ponytail: one shared Json, configured once. ignoreUnknownKeys means Open-Meteo
+// One shared Json, configured once. ignoreUnknownKeys means Open-Meteo
 // can add fields without breaking the app in the field.
 val lenientJson = Json { ignoreUnknownKeys = true }
 

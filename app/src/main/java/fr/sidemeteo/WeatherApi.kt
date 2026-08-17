@@ -2,12 +2,13 @@ package fr.sidemeteo
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.util.Locale
 
 /**
- * Open-Meteo client. Two unauthenticated GETs, so `URL.readText()` is the whole
+ * Open-Meteo client. Two unauthenticated GETs, so `java.net` is the whole
  * transport — no HTTP library earns its place here.
  */
 object WeatherApi {
@@ -27,7 +28,9 @@ object WeatherApi {
             "&current=$CURRENT_FIELDS" +
             "&hourly=$HOURLY_FIELDS" +
             "&daily=$DAILY_FIELDS" +
-            "&timezone=auto&forecast_days=7"
+            "&timezone=auto&forecast_days=7" +
+            // Pinned rather than inherited from the API defaults: the UI labels are hardcoded.
+            "&temperature_unit=celsius&wind_speed_unit=kmh&precipitation_unit=mm"
 
     fun geocodeUrl(query: String): String =
         "https://geocoding-api.open-meteo.com/v1/search" +
@@ -40,8 +43,24 @@ object WeatherApi {
             lenientJson.decodeFromString<GeocodingResponse>(it).results
         }
 
-    /** Raw body, or a failed Result. Callers never see an exception. */
+    /**
+     * Raw body, or a failed Result. Callers never see an exception.
+     *
+     * The connection is opened explicitly rather than via `URL.readText()` so the two
+     * timeouts can be set: their defaults are infinite, and a captive portal or a
+     * half-open socket would otherwise hang the refresh forever with nothing thrown.
+     */
     suspend fun fetch(url: String): Result<String> = withContext(Dispatchers.IO) {
-        runCatching { URL(url).readText() }
+        runCatching {
+            (URL(url).openConnection() as HttpURLConnection).run {
+                connectTimeout = 10_000
+                readTimeout = 15_000
+                try {
+                    inputStream.bufferedReader().use { it.readText() }
+                } finally {
+                    disconnect()
+                }
+            }
+        }
     }
 }

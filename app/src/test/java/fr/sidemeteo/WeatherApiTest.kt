@@ -15,12 +15,18 @@ class WeatherApiTest {
         assertTrue(url.contains("longitude=2.3522"))
         assertTrue(url.contains("timezone=auto"))
         assertTrue(url.contains("forecast_days=7"))
+        // Whole groups, not bare field names: `sunrise` requested under `hourly=` instead of
+        // `daily=` is a live 400 that a per-name contains() would happily accept.
         listOf(
-            "temperature_2m", "relative_humidity_2m", "apparent_temperature",
-            "precipitation", "weather_code", "wind_speed_10m",
-            "precipitation_probability", "temperature_2m_max", "temperature_2m_min",
-            "precipitation_sum", "precipitation_probability_max", "uv_index_max",
-            "sunrise", "sunset",
+            "&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation," +
+                "weather_code,wind_speed_10m",
+            "&hourly=temperature_2m,precipitation_probability,precipitation,weather_code",
+            "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum," +
+                "precipitation_probability_max,uv_index_max,sunrise,sunset",
+            // Pinned units, so the hardcoded °C / km/h / mm labels cannot drift with the API defaults.
+            "&temperature_unit=celsius",
+            "&wind_speed_unit=kmh",
+            "&precipitation_unit=mm",
         ).forEach { assertTrue("missing $it in $url", url.contains(it)) }
     }
 
