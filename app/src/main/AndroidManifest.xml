@@ -22,6 +22,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+          A widget provider receives system broadcasts, so it must be exported. The only action it
+          honours triggers a weather fetch and nothing else: no data leaves the device and nothing
+          is written that the app would not write itself.
+        -->
+        <receiver
+            android:name=".WeatherWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

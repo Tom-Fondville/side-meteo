@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      A widget does not inherit the app's MaterialTheme, so its colours are explicit here.
+      One dark scheme in both system themes: a home-screen tile that flips to white would
+      fight most wallpapers.
+    -->
+    <color name="widget_background">#E61B2430</color>
+    <color name="widget_text">#FFFFFFFF</color>
+    <color name="widget_text_dim">#B3FFFFFF</color>
+</resources>
