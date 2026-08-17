@@ -26,8 +26,9 @@ class MainActivity : ComponentActivity() {
             // no hand-picked palette.
             MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
                 Surface {
-                    App(Store(applicationContext), onForecastSaved = {
-                        WeatherWidget.renderFromCache(applicationContext)
+                    val ctx = applicationContext
+                    App(Store(ctx), onForecastSaved = {
+                        WeatherWidget.renderFromCache(ctx)
                     })
                 }
             }
