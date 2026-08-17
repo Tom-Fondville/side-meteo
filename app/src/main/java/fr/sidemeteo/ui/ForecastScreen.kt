@@ -29,6 +29,7 @@ import fr.sidemeteo.HourEntry
 import fr.sidemeteo.UiState
 import fr.sidemeteo.dayLabel
 import fr.sidemeteo.hourLabel
+import fr.sidemeteo.isToday
 import fr.sidemeteo.weatherLook
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -222,8 +223,3 @@ private fun Double.roundedOne(): String = String.format(Locale.FRENCH, "%.1f", t
 
 /** `"2026-08-17T06:46"` -> `"06:46"`. */
 private fun String.timeOnly(): String = if (length >= 16) substring(11, 16) else this
-
-private fun isToday(epochMillis: Long): Boolean {
-    val day = SimpleDateFormat("yyyy-MM-dd", Locale.FRENCH)
-    return day.format(Date(epochMillis)) == day.format(Date())
-}

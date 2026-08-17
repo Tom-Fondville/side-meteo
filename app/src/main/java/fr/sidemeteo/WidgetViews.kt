@@ -7,9 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
  * Builds the widget's populated views. Split from the provider so that "what the tile looks like"
@@ -27,15 +24,15 @@ fun buildWidgetViews(
     views.setOnClickPendingIntent(R.id.widget_refresh, refreshIntent(context))
 
     views.setTextViewText(R.id.widget_city, city?.name ?: "Météo")
-    views.setTextViewText(R.id.widget_time, fetchedAt?.let { clock(it) } ?: "")
+    views.setTextViewText(
+        R.id.widget_time,
+        fetchedAt?.let { widgetClock(it, System.currentTimeMillis()) } ?: "",
+    )
 
     if (city == null || forecast == null) {
         views.setViewVisibility(R.id.widget_content, View.GONE)
         views.setViewVisibility(R.id.widget_message, View.VISIBLE)
-        views.setTextViewText(
-            R.id.widget_message,
-            if (city == null) "Choisir une ville" else "Météo indisponible",
-        )
+        views.setTextViewText(R.id.widget_message, emptyStateMessage(hasCity = city != null))
         return views
     }
 
@@ -48,10 +45,7 @@ fun buildWidgetViews(
     views.setTextViewText(R.id.widget_condition, look.label)
 
     val today = forecast.days.firstOrNull()
-    views.setTextViewText(
-        R.id.widget_minmax,
-        "${today?.tempMin?.let { Math.round(it) } ?: "—"} / ${today?.tempMax?.let { Math.round(it) } ?: "—"}°",
-    )
+    views.setTextViewText(R.id.widget_minmax, minMaxText(today?.tempMin, today?.tempMax))
 
     // Four fixed cells; forecast.hours already starts at the current hour.
     val cells = listOf(
@@ -64,17 +58,14 @@ fun buildWidgetViews(
         val hour = forecast.hours.getOrNull(i)
         views.setTextViewText(cell.time, hour?.time?.hourLabel() ?: "—")
         views.setTextViewText(cell.emoji, hour?.let { weatherLook(it.weatherCode).emoji } ?: "")
-        views.setTextViewText(cell.temp, hour?.temperature?.let { "${Math.round(it)}°" } ?: "—")
-        views.setTextViewText(cell.rain, hour?.precipitationProbability?.let { "$it %" } ?: "")
+        views.setTextViewText(cell.temp, hourTempText(hour?.temperature))
+        views.setTextViewText(cell.rain, hourRainText(hour?.precipitationProbability))
     }
 
     return views
 }
 
 private class HourCell(val time: Int, val emoji: Int, val temp: Int, val rain: Int)
-
-private fun clock(epochMillis: Long): String =
-    SimpleDateFormat("HH:mm", Locale.FRENCH).format(Date(epochMillis))
 
 private fun openAppIntent(context: Context): PendingIntent =
     PendingIntent.getActivity(

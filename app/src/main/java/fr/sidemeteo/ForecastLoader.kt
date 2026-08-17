@@ -43,9 +43,18 @@ fun cachedForecast(store: Store): Forecast? = store.cachedBody()?.let(::parseFor
  * Fetches, parses and caches, then returns the forecast. Never throws — every failure arrives as
  * `Result.failure`. The cache holds the raw body, so a cached read goes back through the same parse
  * path, and a body that fails to parse is never cached.
+ *
+ * [connectMs]/[readMs] default to the app's own transport timeouts and pass straight through to
+ * [WeatherApi.fetch], so a caller with a tighter wall-clock budget — the widget — can ask for one
+ * without changing the app's own behaviour.
  */
-suspend fun loadForecast(store: Store, city: City): Result<Forecast> =
-    WeatherApi.fetch(WeatherApi.forecastUrl(city.latitude, city.longitude))
+suspend fun loadForecast(
+    store: Store,
+    city: City,
+    connectMs: Int = 10_000,
+    readMs: Int = 15_000,
+): Result<Forecast> =
+    WeatherApi.fetch(WeatherApi.forecastUrl(city.latitude, city.longitude), connectMs, readMs)
         .mapCatching { body ->
             val response = WeatherApi.parseForecast(body)
             val forecast = response.toForecast(nowIn(response.timezone))

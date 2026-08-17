@@ -151,6 +151,10 @@ class WeatherViewModel(
                 error = null,
             )
         }
+        // The widget must not keep showing the previous city while this one's fetch is still in
+        // flight: repaint now, from the state just committed above. Offline, that means "Météo
+        // indisponible" until refresh() below lands — honest, rather than another city's weather.
+        onForecastSaved()
         refresh()
     }
 

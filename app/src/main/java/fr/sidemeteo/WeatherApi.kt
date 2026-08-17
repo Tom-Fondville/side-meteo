@@ -49,18 +49,24 @@ object WeatherApi {
      * The connection is opened explicitly rather than via `URL.readText()` so the two
      * timeouts can be set: their defaults are infinite, and a captive portal or a
      * half-open socket would otherwise hang the refresh forever with nothing thrown.
+     *
+     * [connectMs]/[readMs] default to the app's own values. They are sockets-level limits, not
+     * coroutine cancellation: this I/O is blocking and uninterruptible, so a caller racing this
+     * against `withTimeoutOrNull` only gets a bound on the wall clock by keeping these tighter
+     * than its own timeout, never by relying on cancellation to land mid-read.
      */
-    suspend fun fetch(url: String): Result<String> = withContext(Dispatchers.IO) {
-        runCatching {
-            (URL(url).openConnection() as HttpURLConnection).run {
-                connectTimeout = 10_000
-                readTimeout = 15_000
-                try {
-                    inputStream.bufferedReader().use { it.readText() }
-                } finally {
-                    disconnect()
+    suspend fun fetch(url: String, connectMs: Int = 10_000, readMs: Int = 15_000): Result<String> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                (URL(url).openConnection() as HttpURLConnection).run {
+                    connectTimeout = connectMs
+                    readTimeout = readMs
+                    try {
+                        inputStream.bufferedReader().use { it.readText() }
+                    } finally {
+                        disconnect()
+                    }
                 }
             }
         }
-    }
 }
