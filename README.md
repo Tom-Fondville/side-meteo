@@ -60,8 +60,9 @@ compose-ui-test, and staying dependency-free was worth more here.
 
 ## Known gaps
 
-- No launcher icon, so the phone shows the generic system icon.
-- Days in the 7-day list are not tappable; there is no per-day detail view.
 - `openSearch()` does not cancel an in-flight refresh, so a refresh that fails
   just after you open the city search can surface its banner there once.
 - The city search query is lost on rotation.
+- The widget shows one city (the app's selected city) and refreshes hourly; Android
+  will not schedule widget updates more often than every 30 minutes without a
+  scheduling dependency.

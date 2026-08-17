@@ -26,7 +26,9 @@ class MainActivity : ComponentActivity() {
             // no hand-picked palette.
             MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
                 Surface {
-                    App(Store(applicationContext))
+                    App(Store(applicationContext), onForecastSaved = {
+                        WeatherWidget.renderFromCache(applicationContext)
+                    })
                 }
             }
         }
@@ -34,12 +36,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun App(store: Store) {
+private fun App(store: Store, onForecastSaved: () -> Unit) {
     // A two-line factory instead of a DI framework for one dependency.
     val factory = remember {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = WeatherViewModel(store) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T = WeatherViewModel(store, onForecastSaved) as T
         }
     }
     val vm: WeatherViewModel = viewModel(factory = factory)
