@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Sun behind a cloud, drawn by hand so the icon needs no image tooling and no bitmap.
+  Sun behind a cloud, matching the app's own weather glyph (U+26C5, the emoji shown for
+  WMO code 2). Drawn by hand so the icon needs no image tooling and no bitmap.
   The 108dp canvas is the adaptive-icon standard; the outer 18dp on each side is bleed
-  the launcher may mask away, so the artwork stays inside the middle 72dp.
+  any launcher mask may crop, and a circular mask crops further still (its guaranteed-safe
+  disc is roughly radius 34 around the centre). The composition below is drawn at full
+  size, then the outer group's 0.72 scale around the centre (54,54) pulls every filled
+  pixel inside that disc, so it survives round icon masks too. The factor was chosen by
+  rendering the paths against a radius-34 guide circle and shrinking until nothing crossed it.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -10,37 +15,33 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Sun rays, upper right -->
-    <group android:name="rays">
+    <group
+        android:name="composition"
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.72"
+        android:scaleY="0.72">
+
+        <!-- Sun, eight rays around a disc, left of centre -->
+        <group android:name="rays">
+            <path android:fillColor="#FFA726" android:pathData="M65.8,47.0 L74.0,50.0 L65.8,53.0 Z" />
+            <path android:fillColor="#FFA726" android:pathData="M62.4,61.2 L66.1,69.1 L58.2,65.4 Z" />
+            <path android:fillColor="#FFA726" android:pathData="M50.0,68.8 L47.0,77.0 L44.0,68.8 Z" />
+            <path android:fillColor="#FFA726" android:pathData="M35.8,65.4 L27.9,69.1 L31.6,61.2 Z" />
+            <path android:fillColor="#FFA726" android:pathData="M28.2,53.0 L20.0,50.0 L28.2,47.0 Z" />
+            <path android:fillColor="#FFA726" android:pathData="M31.6,38.8 L27.9,30.9 L35.8,34.6 Z" />
+            <path android:fillColor="#FFA726" android:pathData="M44.0,31.2 L47.0,23.0 L50.0,31.2 Z" />
+            <path android:fillColor="#FFA726" android:pathData="M58.2,34.6 L66.1,30.9 L62.4,38.8 Z" />
+        </group>
+
+        <!-- Sun disc -->
         <path
-            android:fillColor="#FFC24B"
-            android:pathData="M67,22 h4 v-9 h-4 z" />
+            android:fillColor="#FFC107"
+            android:pathData="M47,50 m-19,0 a19,19 0 1,0 38,0 a19,19 0 1,0 -38,0 z" />
+
+        <!-- Cloud, dominant lower-right, overlapping the sun's lower-right quadrant -->
         <path
-            android:fillColor="#FFC24B"
-            android:pathData="M84.4,29.8 l2.8,2.8 6.4,-6.4 -2.8,-2.8 z" />
-        <path
-            android:fillColor="#FFC24B"
-            android:pathData="M88,45 v4 h9 v-4 z" />
-        <path
-            android:fillColor="#FFC24B"
-            android:pathData="M50.2,25.4 l2.8,-2.8 -6.4,-6.4 -2.8,2.8 z" />
+            android:fillColor="#ECEFF1"
+            android:pathData="M49,82 a15,15 0 0,1 0.6,-30 a21,21 0 0,1 39.4,5 a13,13 0 0,1 -2,25 z" />
     </group>
-
-    <!-- Sun disc -->
-    <path
-        android:fillColor="#FFB300"
-        android:pathData="M69,29 m-16,0 a16,16 0 1,0 32,0 a16,16 0 1,0 -32,0 z" />
-
-    <!-- Cloud, overlapping the sun's lower left -->
-    <path
-        android:fillColor="#ECEFF1"
-        android:pathData="M36,76 a15,15 0 0,1 0.6,-30 a21,21 0 0,1 39.4,5 a13,13 0 0,1 -2,25 z" />
-
-    <!-- Two rain drops -->
-    <path
-        android:fillColor="#4FC3F7"
-        android:pathData="M45,82 q4,6 4,8.5 a4,4 0 0,1 -8,0 q0,-2.5 4,-8.5 z" />
-    <path
-        android:fillColor="#4FC3F7"
-        android:pathData="M65,82 q4,6 4,8.5 a4,4 0 0,1 -8,0 q0,-2.5 4,-8.5 z" />
 </vector>
