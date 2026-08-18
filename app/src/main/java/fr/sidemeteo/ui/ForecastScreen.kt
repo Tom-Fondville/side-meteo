@@ -139,6 +139,9 @@ private fun CurrentCard(state: UiState) {
         Column(Modifier.padding(16.dp)) {
             Text("${look.emoji} ${current.temperature.roundedC()}", style = MaterialTheme.typography.displaySmall)
             Text(look.label, style = MaterialTheme.typography.titleMedium)
+            today?.let { day ->
+                Text("Min ${day.tempMin?.roundedInt() ?: "—"}° · Max ${day.tempMax?.roundedInt() ?: "—"}°")
+            }
             Text("Ressenti ${current.apparentTemperature.roundedC()}")
             Text("Vent ${current.windSpeed.roundedInt()} km/h · Humidité ${current.humidity} %")
             Text("Précipitations ${current.precipitation.roundedOne()} mm")
