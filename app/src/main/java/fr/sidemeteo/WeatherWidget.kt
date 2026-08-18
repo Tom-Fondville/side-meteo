@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,25 @@ class WeatherWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, appWidgetIds: IntArray) {
         renderFromCache(context)
+    }
+
+    /**
+     * A resize changes which shape the tile should use. On Android 12+ the launcher already holds
+     * every shape and swaps them itself, so this is the path that matters below that, where the
+     * chosen shape comes from the options bundle this callback announces.
+     */
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        manager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle,
+    ) {
+        super.onAppWidgetOptionsChanged(context, manager, appWidgetId, newOptions)
+        val store = Store(context.applicationContext)
+        manager.updateAppWidget(
+            appWidgetId,
+            buildWidgetViewsFor(context, appWidgetId, store.city, cachedForecast(store), store.cachedAt()),
+        )
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -100,8 +120,11 @@ class WeatherWidget : AppWidgetProvider() {
             val manager = AppWidgetManager.getInstance(context)
             val ids = manager.getAppWidgetIds(ComponentName(context, WeatherWidget::class.java))
             if (ids.isEmpty()) return
-            val views = buildWidgetViews(context, city, forecast, fetchedAt)
-            ids.forEach { manager.updateAppWidget(it, views) }
+            // Built per id rather than once: two placed widgets can be different sizes, and below
+            // Android 12 the shape comes from each widget's own options bundle.
+            ids.forEach { id ->
+                manager.updateAppWidget(id, buildWidgetViewsFor(context, id, city, forecast, fetchedAt))
+            }
         }
     }
 }
