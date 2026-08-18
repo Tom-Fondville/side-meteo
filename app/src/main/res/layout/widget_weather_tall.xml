@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The 2x2 shape: the compact content, then the next three hours as rows. At two cells across the
+  hour strip cannot be columns, so it is rows instead - which is the whole reason this shape exists
+  rather than letting a 2x2 render the 2x1 layout with an empty bottom half.
+
+  Ids are shared with the larger layouts so the builder helpers populate any of them. There is no
+  clock and no refresh glyph here, and the hour rows carry no rain figure, so nothing may set them.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Shown instead of the data when there is no city or no forecast at all. -->
+    <TextView
+        android:id="@+id/widget_message"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:textColor="@color/widget_text"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widget_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/widget_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="5dp"
+                android:textColor="@color/widget_text"
+                android:textSize="23sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_city"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:singleLine="true"
+            android:textColor="@color/widget_text_dim"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/widget_minmax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:paddingTop="1dp"
+            android:textColor="@color/widget_text"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="6dp">
+
+            <TextView
+                android:id="@+id/widget_h1_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_h1_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="6dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_h1_temp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="2dp">
+
+            <TextView
+                android:id="@+id/widget_h2_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_h2_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="6dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_h2_temp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="2dp">
+
+            <TextView
+                android:id="@+id/widget_h3_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_h3_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="6dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_h3_temp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

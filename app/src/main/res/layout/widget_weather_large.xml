@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/widget_city"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/widget_text"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_text_dim"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/widget_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="2dp"
+            android:text="↻"
+            android:textColor="@color/widget_text"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!--
+  The 3x3 shape: everything the 4x2 shape shows, then a divider and the next three days as rows.
+  Every id above the divider is shared with widget_weather.xml so one builder fills both; only the
+  daily rows below are new. The four hour cells are fixed, as they are in the 4x2 shape.
+-->
+    <TextView
+        android:id="@+id/widget_message"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textColor="@color/widget_text"
+        android:textSize="15sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="2dp">
+
+            <TextView
+                android:id="@+id/widget_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="26sp" />
+
+            <TextView
+                android:id="@+id/widget_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textColor="@color/widget_text"
+                android:textSize="26sp" />
+
+            <TextView
+                android:id="@+id/widget_minmax"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:paddingBottom="2dp"
+                android:textColor="@color/widget_text"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_condition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/widget_text_dim"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="2dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_h1_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/widget_h1_emoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/widget_h1_temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/widget_h1_rain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_h2_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/widget_h2_emoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/widget_h2_temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/widget_h2_rain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_h3_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/widget_h3_emoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/widget_h3_temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/widget_h3_rain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_h4_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/widget_h4_emoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/widget_h4_temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/widget_h4_rain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/widget_text_dim"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/widget_text_dim" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
+
+            <TextView
+                android:id="@+id/widget_d1_day"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_d1_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_d1_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_d1_rain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="8dp"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
+
+            <TextView
+                android:id="@+id/widget_d2_day"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_d2_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_d2_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_d2_rain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="8dp"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp">
+
+            <TextView
+                android:id="@+id/widget_d3_day"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_d3_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_d3_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_d3_rain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingStart="8dp"
+                android:textColor="@color/widget_text_dim"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -93,4 +93,12 @@ class WidgetTextTest {
         assertEquals("40 %", hourRainText(40))
         assertEquals("", hourRainText(null))
     }
+
+    @Test
+    fun `a daily row's rain reads in French with a unit, or a dash when absent`() {
+        assertEquals("4,2 mm", dayRainText(4.2))
+        assertEquals("0,0 mm", dayRainText(0.0))
+        assertEquals("12,9 mm", dayRainText(12.85))
+        assertEquals("—", dayRainText(null))
+    }
 }

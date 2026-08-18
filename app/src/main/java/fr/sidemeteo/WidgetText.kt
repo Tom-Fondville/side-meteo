@@ -43,3 +43,7 @@ fun hourTempText(temperature: Double?): String =
 /** An hour cell's rain probability, or `""` when that hour has none. */
 fun hourRainText(probability: Int?): String =
     probability?.let { "$it %" } ?: ""
+
+/** A daily row's precipitation total, French decimal comma and unit, or `"—"` when absent. */
+fun dayRainText(millimetres: Double?): String =
+    millimetres?.let { String.format(Locale.FRENCH, "%.1f mm", it) } ?: "—"

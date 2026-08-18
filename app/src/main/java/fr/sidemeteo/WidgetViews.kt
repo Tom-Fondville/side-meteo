@@ -39,8 +39,10 @@ fun buildWidgetViewsFor(
             mapOf(
                 SizeF(57f, 40f) to buildWidgetViews(context, WidgetSize.TINY, city, forecast, fetchedAt),
                 SizeF(100f, 40f) to buildWidgetViews(context, WidgetSize.COMPACT, city, forecast, fetchedAt),
+                SizeF(100f, 100f) to buildWidgetViews(context, WidgetSize.TALL, city, forecast, fetchedAt),
                 SizeF(200f, 40f) to buildWidgetViews(context, WidgetSize.ROW, city, forecast, fetchedAt),
-                SizeF(250f, 100f) to buildWidgetViews(context, WidgetSize.FULL, city, forecast, fetchedAt),
+                SizeF(200f, 100f) to buildWidgetViews(context, WidgetSize.FULL, city, forecast, fetchedAt),
+                SizeF(200f, 200f) to buildWidgetViews(context, WidgetSize.LARGE, city, forecast, fetchedAt),
             ),
         )
     }
@@ -61,8 +63,10 @@ fun buildWidgetViews(
     forecast: Forecast?,
     fetchedAt: Long?,
 ): RemoteViews = when (size) {
+    WidgetSize.LARGE -> buildLarge(context, city, forecast, fetchedAt)
     WidgetSize.FULL -> buildFull(context, city, forecast, fetchedAt)
     WidgetSize.ROW -> buildRow(context, city, forecast, fetchedAt)
+    WidgetSize.TALL -> buildTall(context, city, forecast)
     WidgetSize.COMPACT -> buildCompact(context, city, forecast)
     WidgetSize.TINY -> buildTiny(context, city, forecast)
 }
@@ -81,13 +85,83 @@ private fun buildFull(
     views.setTextViewText(R.id.widget_condition, weatherLook(forecast.current.weatherCode).label)
     views.setTextViewText(R.id.widget_minmax, todayRange(forecast))
 
-    // Four fixed cells; forecast.hours already starts at the current hour.
+    hourStrip(views, forecast)
+    return views
+}
+
+/**
+ * The 3x3 shape: the 4x2 content, then three daily rows under a divider. Everything above the
+ * divider shares its ids with [buildFull], so the same helpers fill it.
+ */
+private fun buildLarge(
+    context: Context,
+    city: City?,
+    forecast: Forecast?,
+    fetchedAt: Long?,
+): RemoteViews {
+    val views = RemoteViews(context.packageName, R.layout.widget_weather_large)
+    header(views, context, city, fetchedAt)
+    if (emptyState(views, city, forecast)) return views
+
+    current(views, forecast!!)
+    views.setTextViewText(R.id.widget_condition, weatherLook(forecast.current.weatherCode).label)
+    views.setTextViewText(R.id.widget_minmax, todayRange(forecast))
+    hourStrip(views, forecast)
+
+    // Tomorrow onwards: days[0] is today, already summarised above the strip.
+    val rows = listOf(
+        DayRow(R.id.widget_d1_day, R.id.widget_d1_emoji, R.id.widget_d1_range, R.id.widget_d1_rain),
+        DayRow(R.id.widget_d2_day, R.id.widget_d2_emoji, R.id.widget_d2_range, R.id.widget_d2_rain),
+        DayRow(R.id.widget_d3_day, R.id.widget_d3_emoji, R.id.widget_d3_range, R.id.widget_d3_rain),
+    )
+    rows.forEachIndexed { i, row ->
+        val day = forecast.days.getOrNull(i + 1)
+        views.setTextViewText(row.day, day?.date?.dayLabel() ?: "—")
+        views.setTextViewText(row.emoji, day?.let { weatherLook(it.weatherCode).emoji } ?: "")
+        views.setTextViewText(row.range, minMaxText(day?.tempMin, day?.tempMax))
+        views.setTextViewText(row.rain, dayRainText(day?.precipitationSum))
+    }
+    return views
+}
+
+/**
+ * The 2x2 shape: the compact content, then the next three hours as rows. Two cells across is too
+ * narrow for the hour strip's columns, which is why this shape exists at all.
+ */
+private fun buildTall(context: Context, city: City?, forecast: Forecast?): RemoteViews {
+    val views = RemoteViews(context.packageName, R.layout.widget_weather_tall)
+    views.setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
+    // No clock and no refresh glyph at this width; the hourly rows earn the room instead.
+    views.setTextViewText(R.id.widget_city, city?.name ?: "Météo")
+    if (emptyState(views, city, forecast)) return views
+
+    current(views, forecast!!)
+    views.setTextViewText(R.id.widget_minmax, todayRange(forecast))
+
+    // Three rows, and no rain figure: this layout has no view for one.
+    val rows = listOf(
+        Triple(R.id.widget_h1_time, R.id.widget_h1_emoji, R.id.widget_h1_temp),
+        Triple(R.id.widget_h2_time, R.id.widget_h2_emoji, R.id.widget_h2_temp),
+        Triple(R.id.widget_h3_time, R.id.widget_h3_emoji, R.id.widget_h3_temp),
+    )
+    rows.forEachIndexed { i, (time, emoji, temp) ->
+        val hour = forecast.hours.getOrNull(i)
+        views.setTextViewText(time, hour?.time?.hourLabel() ?: "—")
+        views.setTextViewText(emoji, hour?.let { weatherLook(it.weatherCode).emoji } ?: "")
+        views.setTextViewText(temp, hourTempText(hour?.temperature))
+    }
+    return views
+}
+
+/** The four fixed hour cells, shared by the shapes wide enough to show them as columns. */
+private fun hourStrip(views: RemoteViews, forecast: Forecast) {
     val cells = listOf(
         HourCell(R.id.widget_h1_time, R.id.widget_h1_emoji, R.id.widget_h1_temp, R.id.widget_h1_rain),
         HourCell(R.id.widget_h2_time, R.id.widget_h2_emoji, R.id.widget_h2_temp, R.id.widget_h2_rain),
         HourCell(R.id.widget_h3_time, R.id.widget_h3_emoji, R.id.widget_h3_temp, R.id.widget_h3_rain),
         HourCell(R.id.widget_h4_time, R.id.widget_h4_emoji, R.id.widget_h4_temp, R.id.widget_h4_rain),
     )
+    // forecast.hours already starts at the current hour.
     cells.forEachIndexed { i, cell ->
         val hour = forecast.hours.getOrNull(i)
         views.setTextViewText(cell.time, hour?.time?.hourLabel() ?: "—")
@@ -95,7 +169,6 @@ private fun buildFull(
         views.setTextViewText(cell.temp, hourTempText(hour?.temperature))
         views.setTextViewText(cell.rain, hourRainText(hour?.precipitationProbability))
     }
-    return views
 }
 
 private fun buildRow(
@@ -174,6 +247,8 @@ private fun todayRange(forecast: Forecast): String {
 }
 
 private class HourCell(val time: Int, val emoji: Int, val temp: Int, val rain: Int)
+
+private class DayRow(val day: Int, val emoji: Int, val range: Int, val rain: Int)
 
 private fun openAppIntent(context: Context): PendingIntent =
     PendingIntent.getActivity(

@@ -55,6 +55,7 @@ compose-ui-test, and staying dependency-free was worth more here.
 
 ## Docs
 
+- Widget, size by size: [`docs/widget-sizes.md`](docs/widget-sizes.md)
 - Design: `docs/superpowers/specs/2026-08-17-side-meteo-design.md`
 - Implementation plan: `docs/superpowers/plans/2026-08-17-side-meteo.md`
 
