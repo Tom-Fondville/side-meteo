@@ -16,7 +16,7 @@ import android.widget.RemoteViews
  *
  * There is one builder per shape rather than one builder with branches, because a `RemoteViews`
  * action aimed at an id the chosen layout does not contain throws when the launcher applies it —
- * the tiny layout has no clock, no refresh glyph and no hour cells, so nothing may set them.
+ * the tiny and compact layouts have no clock, no refresh glyph and no hour cells, so nothing may set them.
  */
 
 /**
@@ -37,7 +37,8 @@ fun buildWidgetViewsFor(
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         return RemoteViews(
             mapOf(
-                SizeF(110f, 40f) to buildWidgetViews(context, WidgetSize.TINY, city, forecast, fetchedAt),
+                SizeF(57f, 40f) to buildWidgetViews(context, WidgetSize.TINY, city, forecast, fetchedAt),
+                SizeF(100f, 40f) to buildWidgetViews(context, WidgetSize.COMPACT, city, forecast, fetchedAt),
                 SizeF(200f, 40f) to buildWidgetViews(context, WidgetSize.ROW, city, forecast, fetchedAt),
                 SizeF(250f, 100f) to buildWidgetViews(context, WidgetSize.FULL, city, forecast, fetchedAt),
             ),
@@ -62,6 +63,7 @@ fun buildWidgetViews(
 ): RemoteViews = when (size) {
     WidgetSize.FULL -> buildFull(context, city, forecast, fetchedAt)
     WidgetSize.ROW -> buildRow(context, city, forecast, fetchedAt)
+    WidgetSize.COMPACT -> buildCompact(context, city, forecast)
     WidgetSize.TINY -> buildTiny(context, city, forecast)
 }
 
@@ -112,6 +114,18 @@ private fun buildRow(
     return views
 }
 
+private fun buildCompact(context: Context, city: City?, forecast: Forecast?): RemoteViews {
+    val views = RemoteViews(context.packageName, R.layout.widget_weather_compact)
+    views.setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
+    // No clock and no refresh glyph at this size: today's range earns the room instead.
+    views.setTextViewText(R.id.widget_city, city?.name ?: "Météo")
+    if (emptyState(views, city, forecast)) return views
+
+    current(views, forecast!!)
+    views.setTextViewText(R.id.widget_minmax, todayRange(forecast))
+    return views
+}
+
 private fun buildTiny(context: Context, city: City?, forecast: Forecast?): RemoteViews {
     val views = RemoteViews(context.packageName, R.layout.widget_weather_tiny)
     views.setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
@@ -123,7 +137,7 @@ private fun buildTiny(context: Context, city: City?, forecast: Forecast?): Remot
     return views
 }
 
-/** City, timestamp and the two tap targets — every shape but [WidgetSize.TINY] has all of them. */
+/** City, timestamp and the two tap targets — the ROW and FULL shapes only. */
 private fun header(views: RemoteViews, context: Context, city: City?, fetchedAt: Long?) {
     views.setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
     views.setOnClickPendingIntent(R.id.widget_refresh, refreshIntent(context))

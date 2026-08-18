@@ -3,7 +3,7 @@
     android:description="@string/widget_description"
     android:initialLayout="@layout/widget_weather"
     android:minHeight="40dp"
-    android:minWidth="110dp"
+    android:minWidth="57dp"
     android:previewLayout="@layout/widget_weather"
     android:resizeMode="horizontal|vertical"
     android:targetCellHeight="2"
