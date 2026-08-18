@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
@@ -35,6 +36,17 @@ fun buildWidgetViewsFor(
     fetchedAt: Long?,
 ): RemoteViews {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        // Diagnostics: on this path the launcher picks a shape from the map itself, so the only way
+        // to know which footprint it is matching against is to log what it reports.
+        val options = AppWidgetManager.getInstance(context).getAppWidgetOptions(appWidgetId)
+        Log.d(
+            "WeatherWidget",
+            "id=$appWidgetId reports min=" +
+                "${options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)}x" +
+                "${options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)}dp max=" +
+                "${options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)}x" +
+                "${options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)}dp",
+        )
         return RemoteViews(
             mapOf(
                 SizeF(57f, 40f) to buildWidgetViews(context, WidgetSize.TINY, city, forecast, fetchedAt),
@@ -48,10 +60,10 @@ fun buildWidgetViewsFor(
     }
 
     val options = AppWidgetManager.getInstance(context).getAppWidgetOptions(appWidgetId)
-    val size = widgetSizeFor(
-        widthDp = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) ?: 0,
-        heightDp = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) ?: 0,
-    )
+    val widthDp = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) ?: 0
+    val heightDp = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) ?: 0
+    val size = widgetSizeFor(widthDp, heightDp)
+    Log.d("WeatherWidget", "id=$appWidgetId reported ${widthDp}x${heightDp}dp -> $size")
     return buildWidgetViews(context, size, city, forecast, fetchedAt)
 }
 

@@ -267,7 +267,12 @@
             </LinearLayout>
         </LinearLayout>
 
-        <View
+        <!--
+          A FrameLayout, not a View: RemoteViews inflates only an allowlist of classes and plain
+          android.view.View is not on it, which fails the whole layout at render time with
+          "Impossible de charger le widget" and nothing at compile time.
+        -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="8dp"
