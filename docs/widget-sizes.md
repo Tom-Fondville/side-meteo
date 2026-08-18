@@ -16,20 +16,20 @@ what actually decide.
 
 | Grid | Shape | Shows | Refresh glyph |
 |---|---|---|---|
-| 1×1 | `TINY` | Condition emoji, current temperature, city | no |
-| 2×1 | `COMPACT` | The above, plus today's min/max on the right | no |
+| 1×1 | `TINY` | Condition emoji, current temperature, city, today's min/max | no |
+| 2×1 | `COMPACT` | The same, with the min/max beside the temperature rather than under the city | no |
 | 2×2 | `TALL` | The above, plus the next three hours as rows | no |
 | 3×1, 4×1 | `ROW` | City, timestamp, emoji, temperature, condition, today's min/max | yes |
 | 3×2, 4×2 | `FULL` | The above, plus the next four hours as columns with rain probability | yes |
 | 3×3, 4×3 | `LARGE` | The above, plus the next three days as rows with their range and rain total | yes |
 
 ```
-1×1            2×1                  2×2
-┌────────┐    ┌──────────────┐    ┌──────────────┐
-│ 🌤 23° │    │ 🌤 23°  20 / │    │ 🌤 23°       │
-│Bordeaux│    │Bordeaux  31° │    │ Bordeaux     │
-└────────┘    └──────────────┘    │ 20 / 31°     │
-                                   │ 11h 🌤   25° │
+1×1             2×1                  2×2
+┌─────────┐    ┌──────────────┐    ┌──────────────┐
+│ 🌤 23°  │    │ 🌤 23°  20 / │    │ 🌤 23°       │
+│Bordeaux │    │Bordeaux  31° │    │ Bordeaux     │
+│20 / 31° │    └──────────────┘    │ 20 / 31°     │
+└─────────┘                        │ 11h 🌤   25° │
                                    │ 12h 🌤   27° │
                                    │ 13h 🌤   28° │
                                    └──────────────┘

@@ -214,11 +214,12 @@ private fun buildCompact(context: Context, city: City?, forecast: Forecast?): Re
 private fun buildTiny(context: Context, city: City?, forecast: Forecast?): RemoteViews {
     val views = RemoteViews(context.packageName, R.layout.widget_weather_tiny)
     views.setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
-    // No clock and no refresh glyph at this size: the city name is worth the room instead.
+    // No clock and no refresh glyph at this size: the city and today's range are worth the room.
     views.setTextViewText(R.id.widget_city, city?.name ?: "Météo")
     if (emptyState(views, city, forecast)) return views
 
     current(views, forecast!!)
+    views.setTextViewText(R.id.widget_minmax, todayRange(forecast))
     return views
 }
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The 2x1 shape: temperature with its condition emoji, city underneath. No refresh glyph - at this
-  width it would crowd the temperature, and the hourly tick plus opening the app both still
-  refresh. Tapping the tile opens the app, as at every size.
+  The 1x1 shape: temperature with its condition emoji, city and today's range underneath. No
+  refresh glyph - at this width it would crowd the temperature, and the hourly tick plus opening
+  the app both still refresh. Tapping the tile opens the app, as at every size.
 
   Ids are shared with the larger layouts so one builder can populate any of them; the views this
   shape has no room for simply do not exist here, and the builder must not assume they do.
@@ -64,6 +64,15 @@
             android:includeFontPadding="false"
             android:singleLine="true"
             android:textColor="@color/widget_text_dim"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/widget_minmax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:singleLine="true"
+            android:textColor="@color/widget_text"
             android:textSize="11sp" />
     </LinearLayout>
 </LinearLayout>
